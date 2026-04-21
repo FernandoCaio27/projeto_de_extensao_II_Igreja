@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal IMMB - Loja</title>
+    <link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background: linear-gradient(180deg, #ffffff 0%, #e0f8e9 40%, #a8e063 100%);
+            background-attachment: fixed;
+            color: #0b3d20;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        h1, h2, .logo { font-family: 'Shrikhand', cursive; text-shadow: 0 2px 4px rgba(255,255,255,0.9); }
+
+        /* PAINEL DE VIDRO */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.55);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 32px 0 rgba(40, 150, 70, 0.15), inset 0 2px 10px rgba(255,255,255,0.8);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 25px;
+            padding: 25px;
+        }
+
+        .btn-bolha {
+            background: linear-gradient(180deg, #81fbb8 0%, #28c76f 49%, #1b9b53 50%, #4ce08b 100%);
+            border: 2px solid rgba(255,255,255,0.9);
+            border-radius: 50px; 
+            color: white;
+            padding: 12px 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: inset 0px 4px 6px rgba(255,255,255,0.6), 0 6px 10px rgba(0,0,0,0.15);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+        }
+        .btn-bolha:hover { transform: scale(1.05); filter: brightness(1.15); }
+        .btn-bolha:disabled { background: linear-gradient(180deg, #d4d4d4, #a3a3a3); border-color: #eee; cursor: not-allowed; box-shadow: none; transform: none; color: #555; text-shadow: none;}
+
+        .btn-secundario { background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 49%, #e0e0e0 50%, #ffffff 100%); color: #0b3d20; text-shadow: 0 1px 0px #fff; }
+
+        .bolhas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .bolha {
+            position: absolute; bottom: -100px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2) 60%, rgba(150, 255, 180, 0.3) 100%);
+            border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 50%;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.6), 0 4px 10px rgba(0,0,0,0.1);
+            animation: subir infinite ease-in;
+        }
+        @keyframes subir {
+            0% { transform: translateY(0) scale(1) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-120vh) scale(1.5) translateX(30px); opacity: 0; }
+        }
+
+        header { padding: 15px 25px; background: rgba(255,255,255,0.6); border-bottom: 2px solid #fff; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .menu-btn { font-size: 28px; cursor: pointer; background: none; border: none; color: #0b3d20; text-shadow: 0 2px 2px #fff; }
+
+        #sidebar { position: fixed; top: 0; left: -300px; width: 300px; height: 100%; z-index: 2000; transition: 0.4s; padding-top: 80px; }
+        #sidebar.active { left: 0; }
+        #sidebar a { display: block; padding: 20px; color: #0b3d20; text-decoration: none; font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.6); }
+        #sidebar a:hover { background: rgba(255,255,255,0.5); }
+
+        .hidden { display: none !important; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+
+        .secao-amazon { margin-top: 20px; margin-bottom: 30px; }
+        .secao-amazon h3 { margin-bottom: 10px; font-family: 'Segoe UI'; font-size: 1.3rem; border-bottom: 2px solid rgba(0,0,0,0.1); padding-bottom: 5px; color: #1b9b53; }
+        
+        .carrossel-produtos { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; scrollbar-width: thin; }
+        
+        .amazon-card {
+            background: rgba(255,255,255,0.85); border: 1px solid #fff; border-radius: 12px; min-width: 220px; max-width: 220px;
+            padding: 15px; cursor: pointer; text-align: left; transition: all 0.2s; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .amazon-card:hover { box-shadow: 0 8px 20px rgba(40,150,70,0.2); transform: translateY(-5px); border-color: #28c76f; }
+        
+        .amazon-card img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 10px; }
+        .amz-titulo { color: #0b3d20; font-size: 1rem; font-weight: 600; line-height: 1.2; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .amz-titulo:hover { color: #1b9b53; text-decoration: underline; }
+        
+        .amz-estrelas { color: #FFA41C; font-size: 0.9rem; margin-bottom: 5px; }
+        .amz-avaliacoes { color: #555; font-size: 0.8rem; margin-left: 5px; font-weight: normal; }
+        
+        .amz-preco-container { display: flex; align-items: baseline; gap: 5px; margin-bottom: 5px; }
+        .amz-cifrao { font-size: 0.8rem; position: relative; top: -5px; color: #111;}
+        .amz-preco { font-size: 1.5rem; font-weight: bold; color: #0F1111; }
+        .amz-centavos { font-size: 0.8rem; position: relative; top: -5px; color: #111;}
+        
+        .selo-comprado { position: absolute; top: 10px; right: 10px; background: #1b9b53; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        .detalhe-container { display: flex; flex-wrap: wrap; gap: 20px; background: rgba(255,255,255,0.85); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .detalhe-imagem { flex: 1; min-width: 250px; text-align: center; }
+        .detalhe-imagem img { max-width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .detalhe-info { flex: 2; min-width: 280px; }
+        
+        .highlight-aero {
+            background: linear-gradient(120deg, rgba(40, 199, 111, 0.9) 0%, rgba(168, 224, 99, 0.9) 100%);
+            color: #ffffff; /* Texto branco */
+            
+            /* Borda preta em volta da letra para destacar */
+            -webkit-text-stroke: 1px #000000;
+            
+            /* Sombra escura extra para dar profundidade e leitura */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            
+            padding: 10px 25px;
+            border-radius: 20px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(40, 199, 111, 0.4);
+            border: 2px solid rgba(255,255,255,0.8);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bolhas-container">
+        <div class="bolha" style="width: 80px; height: 80px; left: 10%; animation-duration: 8s;"></div>
+        <div class="bolha" style="width: 40px; height: 40px; left: 25%; animation-duration: 12s; animation-delay: 2s;"></div>
+        <div class="bolha" style="width: 120px; height: 120px; left: 60%; animation-duration: 15s; animation-delay: 1s;"></div>
+        <div class="bolha" style="width: 60px; height: 60px; left: 80%; animation-duration: 9s; animation-delay: 4s;"></div>
+        <div class="bolha" style="width: 90px; height: 90px; left: 45%; animation-duration: 11s; animation-delay: 3s;"></div>
+        <div class="bolha" style="width: 50px; height: 50px; left: 15%; animation-duration: 10s; animation-delay: 5s;"></div>
+        <div class="bolha" style="width: 70px; height: 70px; left: 70%; animation-duration: 13s; animation-delay: 0.5s;"></div>
+        <div class="bolha" style="width: 30px; height: 30px; left: 85%; animation-duration: 7s; animation-delay: 6s;"></div>
+        <div class="bolha" style="width: 100px; height: 100px; left: 35%; animation-duration: 14s; animation-delay: 2.5s;"></div>
+        <div class="bolha" style="width: 45px; height: 45px; left: 55%; animation-duration: 8.5s; animation-delay: 7s;"></div>
+        <div class="bolha" style="width: 65px; height: 65px; left: 5%; animation-duration: 11.5s; animation-delay: 1.5s;"></div>
+        <div class="bolha" style="width: 85px; height: 85px; left: 90%; animation-duration: 10.5s; animation-delay: 4.5s;"></div>
+    </div>
+
+    <div id="section-login" class="container">
+        <div class="glass-panel" style="max-width: 450px; margin: 80px auto; text-align: center;">
+            <h1 style="font-size: 2.5rem; color: #1b9b53; line-height: 1.2; margin-bottom: 10px;">Igreja Messiânica Mundial do Brasil</h1>
+            <p style="margin-bottom: 30px; font-weight: bold; color: #0b3d20;">Conecte-se à nossa comunidade</p>
+            
+            <input type="email" id="email" placeholder="E-mail" style="width:100%; padding:15px; margin-bottom:15px; border-radius:30px; border:2px solid #fff; background: rgba(255,255,255,0.8); outline: none; font-size: 1rem; color: #333;">
+            <input type="password" id="password" placeholder="Senha" style="width:100%; padding:15px; margin-bottom:25px; border-radius:30px; border:2px solid #fff; background: rgba(255,255,255,0.8); outline: none; font-size: 1rem; color: #333;">
+            
+            <button class="btn-bolha" onclick="handleLogin()">Fazer Login</button>
+            <button class="btn-bolha btn-secundario" style="margin-top:15px;" onclick="handleRegister()">Criar Conta Nova</button>
+        </div>
+    </div>
+
+    <div id="section-app" class="hidden">
+        <header class="glass-panel" style="border-radius: 0; padding: 10px 20px;">
+            <button class="menu-btn" onclick="toggleMenu()">☰</button>
+            <div class="logo" style="font-size: 1.5rem; color: #1b9b53;">IMMB - Portal</div>
+            <button onclick="handleLogout()" style="background:none; border:none; color:#d32f2f; font-weight:bold; cursor:pointer; font-size: 1rem;">Sair</button>
+        </header>
+
+        <nav id="sidebar" class="glass-panel">
+            <div style="position:absolute; top:20px; right:20px; cursor:pointer; font-size: 24px; color: #1b9b53;" onclick="toggleMenu()">✕</div>
+            <h2 style="padding: 0 20px; color: #1b9b53; margin-bottom: 20px;">Menu</h2>
+            <a href="#" onclick="showPage('home')">🏠 Início</a>
+            <a href="#" onclick="showPage('loja')">🛒 Nossa Lojinha</a>
+        </nav>
+
+        <main class="container">
+            <div id="page-home" class="glass-panel" style="text-align: center; padding: 40px 20px; max-width: 900px; margin: 0 auto;">
+                
+                <img src="10-mobile-19401-1080x1080.webp" onerror="this.src='https://images.unsplash.com/photo-1558285549-2a06eeacfc99?w=1080';" alt="Solo Sagrado da IMMB" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 4px solid rgba(255,255,255,0.9); margin-bottom: 30px;">
+                
+                <h1 style="font-size: 2.2rem; margin-bottom:30px; font-family: 'Shrikhand', cursive;">
+                    <span class="highlight-aero">Boas vindas a lojinha da Igreja Messiânica Mundial do Brasil.</span>
+                </h1>
+                
+                <button class="btn-bolha" style="max-width: 300px;" onclick="showPage('loja')">Acessar a Loja</button>
+            </div>
+
+            <div id="page-loja" class="hidden">
+                <div class="glass-panel" style="padding: 15px;">
+                    <h2 style="color: #0b3d20; font-family: 'Segoe UI'; font-weight: bold; margin-bottom: 20px;">Lojinha da Igreja</h2>
+                    
+                    <div class="secao-amazon">
+                        <h3>Livros Oficiais</h3>
+                        <div id="grid-livros" class="carrossel-produtos"></div>
+                    </div>
+
+                    <div class="secao-amazon">
+                        <h3>Produtos e Vestuário</h3>
+                        <div id="grid-produtos" class="carrossel-produtos"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-detalhe" class="hidden">
+                <div id="detalhe-content" class="detalhe-container">
+                    </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCg8VD-4Rh5xB9fO5QCoQU7ZhU14SgKEMM",
+            authDomain: "teste-b1d02.firebaseapp.com",
+            projectId: "teste-b1d02",
+            storageBucket: "teste-b1d02.firebasestorage.app",
+            messagingSenderId: "883078368327",
+            appId: "1:883078368327:web:3d3213f23a10aaf79e7562"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let userUID = null;
+        let userPurchases = [];
+
+        const PRODUTOS = [
+            { id: 201, categoria: "livros", nome: "Alicerce do Paraíso 1", precoReal: "45", precoCentavos: "00", estrelas: "⭐⭐⭐⭐⭐", avaliacoes: "1.250", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300", desc: "Capa Dura - Número de páginas: 216 páginas.<br>Dimensões: 21,8 cm x 14,5 cm<br>Peso unidade : 387 gramas." },
+            { id: 202, categoria: "livros", nome: "Alicerce do Paraíso 2", precoReal: "45", precoCentavos: "00", estrelas: "⭐⭐⭐⭐⭐", avaliacoes: "1.100", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300", desc: "Capa Dura - Número de páginas: 216 páginas.<br>Dimensões: 21,8 cm x 14,5 cm<br>Peso unidade : 387 gramas." },
+            { id: 203, categoria: "livros", nome: "Alicerce do Paraíso 3", precoReal: "45", precoCentavos: "00", estrelas: "⭐⭐⭐⭐⭐", avaliacoes: "980", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300", desc: "Capa Dura - Número de páginas: 216 páginas.<br>Dimensões: 21,8 cm x 14,5 cm<br>Peso unidade : 387 gramas." },
+            { id: 204, categoria: "livros", nome: "Alicerce do Paraíso 4", precoReal: "45", precoCentavos: "00", estrelas: "⭐⭐⭐⭐⭐", avaliacoes: "950", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300", desc: "Capa Dura - Número de páginas: 216 páginas.<br>Dimensões: 21,8 cm x 14,5 cm<br>Peso unidade : 387 gramas." },
+            { id: 205, categoria: "produtos", nome: "Caneca de Cerâmica da nossa igreja", precoReal: "35", precoCentavos: "00", estrelas: "⭐⭐⭐⭐⭐", avaliacoes: "420", img: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300", desc: "Material: Cerâmica de alta qualidade.<br>Capacidade: 325ml.<br>Pode ser levada ao micro-ondas e lava-louças." },
+            { id: 206, categoria: "produtos", nome: "Camisa da nossa igreja", precoReal: "50", precoCentavos: "00", estrelas: "⭐⭐⭐⭐⭐", avaliacoes: "600", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300", desc: "Material: 100% Algodão sustentável.<br>Fio 30.1 Penteado para maior conforto e durabilidade.<br>Tamanhos disponíveis: P, M, G, GG e XG." }
+        ];
+
+        async function syncPurchases() {
+            if (!userUID) return;
+            const q = query(collection(db, "compras"), where("uid", "==", userUID));
+            const snap = await getDocs(q);
+            userPurchases = snap.docs.map(doc => doc.data().prodId);
+            renderizarLoja();
+        }
+
+        window.buyItem = async (id) => {
+            await addDoc(collection(db, "compras"), { uid: userUID, prodId: id, date: new Date() });
+            alert("✅ Compra confirmada com sucesso!");
+            await syncPurchases();
+            showPage('home'); 
+        };
+
+        function renderizarLoja() {
+            const gridLivros = document.getElementById('grid-livros');
+            const gridProdutos = document.getElementById('grid-produtos');
+            gridLivros.innerHTML = ''; gridProdutos.innerHTML = '';
+
+            PRODUTOS.forEach(p => {
+                const isBought = userPurchases.includes(p.id);
+                const selo = isBought ? `<div class="selo-comprado">Adquirido ✓</div>` : '';
+                
+                const htmlCard = `
+                    <div class="amazon-card" onclick="openDetail(${p.id})">
+                        ${selo}
+                        <img src="${p.img}" alt="${p.nome}">
+                        <div class="amz-titulo">${p.nome}</div>
+                        <div class="amz-estrelas">${p.estrelas} <span class="amz-avaliacoes">${p.avaliacoes}</span></div>
+                        <div class="amz-preco-container">
+                            <span class="amz-cifrao">R$</span>
+                            <span class="amz-preco">${p.precoReal}</span>
+                            <span class="amz-centavos">${p.precoCentavos}</span>
+                        </div>
+                    </div>
+                `;
+
+                if(p.categoria === 'livros') gridLivros.innerHTML += htmlCard;
+                else gridProdutos.innerHTML += htmlCard;
+            });
+        }
+
+        window.openDetail = (id) => {
+            const p = PRODUTOS.find(x => x.id === id);
+            const isBought = userPurchases.includes(p.id);
+            const content = document.getElementById('detalhe-content');
+
+            let botaoHTML = isBought 
+                ? `<button class="btn-bolha btn-secundario" disabled style="margin-top:20px; font-size: 1.2rem;">Produto Já Adquirido</button>`
+                : `<button class="btn-bolha" style="margin-top:20px; font-size: 1.2rem;" onclick="buyItem(${p.id})">Confirmar Compra</button>`;
+
+            content.innerHTML = `
+                <div class="detalhe-imagem">
+                    <img src="${p.img}">
+                </div>
+                <div class="detalhe-info">
+                    <h1 style="color: #0b3d20; font-family: 'Segoe UI'; font-size: 1.8rem; margin-bottom: 10px;">${p.nome}</h1>
+                    <div class="amz-estrelas" style="font-size: 1.2rem; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">${p.estrelas} <span class="amz-avaliacoes" style="font-size:1rem;">${p.avaliacoes} avaliações</span></div>
+                    
+                    <div style="display:flex; align-items: baseline; gap: 5px; color: #1b9b53; margin-bottom: 15px;">
+                        <span style="font-size: 1rem; position:relative; top:-10px;">R$</span>
+                        <span style="font-size: 2.5rem; font-weight: bold;">${p.precoReal}</span>
+                        <span style="font-size: 1rem; position:relative; top:-10px;">${p.precoCentavos}</span>
+                    </div>
+                    
+                    <div style="font-size: 1.1rem; line-height: 1.6; color: #444; margin-bottom: 20px; background: rgba(255,255,255,0.6); padding: 15px; border-radius: 10px;">
+                        ${p.desc}
+                    </div>
+                    
+                    ${botaoHTML}
+                    <button class="btn-bolha btn-secundario" style="margin-top:15px;" onclick="showPage('home')">Voltar para Início</button>
+                </div>
+            `;
+            showPage('page-detalhe');
+        }
+
+        onAuthStateChanged(auth, u => {
+            if (u) {
+                userUID = u.uid;
+                document.getElementById('section-login').classList.add('hidden');
+                document.getElementById('section-app').classList.remove('hidden');
+                syncPurchases();
+                showPage('home');
+            } else {
+                userUID = null;
+                document.getElementById('section-login').classList.remove('hidden');
+                document.getElementById('section-app').classList.add('hidden');
+            }
+        });
+
+        window.handleLogin = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Erro ao entrar. Verifique seus dados."));
+        window.handleRegister = () => createUserWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Erro ao criar a conta."));
+        window.handleLogout = () => signOut(auth);
+        
+        window.toggleMenu = () => document.getElementById('sidebar').classList.toggle('active');
+        
+        window.showPage = (id) => {
+            ['page-home', 'page-loja', 'page-detalhe'].forEach(p => document.getElementById(p).classList.add('hidden'));
+            document.getElementById(id.startsWith('page') ? id : 'page-'+id).classList.remove('hidden');
+            document.getElementById('sidebar').classList.remove('active');
+            if(id === 'loja' || id === 'page-loja') syncPurchases(); 
+        };
+    </script>
+</body>
+</html>
